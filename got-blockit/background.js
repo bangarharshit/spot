@@ -1,28 +1,39 @@
-chrome.runtime.onInstalled.addListener(function() {
-    chrome.declarativeContent.onPageChanged.removeRules(undefined, function() {
-        chrome.declarativeContent.onPageChanged.addRules([{
-            conditions: [new chrome.declarativeContent.PageStateMatcher({
-                pageUrl: {hostEquals: 'www.linkedin.com', pathContains: 'messaging'}
-            })
-            ],
-            actions: [new chrome.declarativeContent.ShowPageAction()]
-        }]);
+chrome.runtime.onConnect.addListener(function(port) {
+    console.assert(port.name === "gost");
+    var disconnected;
+    port.onDisconnect.addListener(function (port) {
+        disconnected = true;
+    });
+    port.onMessage.addListener(function(msg) {
+        if (msg.request === "fetchkeywordAndPreference") {
+            chrome.storage.sync.get(['keyword', 'disabled'],function(result){
+                var keyword = result.keyword;
+                if (!keyword) {
+                    keyword = '';
+                }
+                if (!disconnected) {
+                    port.postMessage({'keyword': keyword.toLowerCase(), 'disabled': false, 'remoteData': domData, 'spoilerData': spoilerData});
+                }
+                db.collection("config").doc('dom_structure').get().then((doc) => {
+                    domData = doc.data();
+                    if (!disconnected && domData) {
+                        port.postMessage({'keyword': keyword.toLowerCase(), 'disabled': false, 'remoteData': domData, 'spoilerData': spoilerData});
+                    }
+                });
+                db.collection("config").doc("spoilers").get().then((doc) => {
+                    spoilerData = doc.data();
+                    if (!disconnected && spoilerData) {
+                        port.postMessage({'keyword': keyword.toLowerCase(), 'disabled': false, 'remoteData': domData, 'spoilerData': spoilerData});
+                    }
+                });
+
+            });
+        }
     });
 });
 
-chrome.runtime.onMessage.addListener(function(request, sender, sendResponse){
-    if (request.todo === 'fetchkeywordAndPreference') {
-        chrome.storage.sync.get(['keyword', 'disabled'],function(result){
-            var keyword = result.keyword;
-            if (!keyword) {
-                keyword = '';
-            }
-            sendResponse({'keyword': keyword.toLowerCase(), 'disabled': false});
-        });
-    }
-    return true
-});
-
+var domData;
+var spoilerData;
 var firebaseConfig = {
     apiKey: "AIzaSyCbCH7CdQJZ0_YIfrtY1EH2Kla_m8zpOj8",
     authDomain: "clean-it-8e8b2.firebaseapp.com",
@@ -34,7 +45,7 @@ var firebaseConfig = {
 };
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
-
+var db = firebase.firestore();
 
 
 

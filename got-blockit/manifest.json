@@ -20,7 +20,7 @@
   },
 
   "background": {
-    "scripts": ["background.js"],
+    "page": "background.html",
     "persistent": false
   },
 
@@ -44,7 +44,7 @@
         "*://www.quora.com/*",
         "*://www.instagram.com/*"
       ],
-      "js": ["jquery-3.1.0.min.js", "content.js"],
+      "js": ["jquery-3.1.0.min.js", "content.js", "helper.js"],
       "css": ["content.css"]
     }
   ],
