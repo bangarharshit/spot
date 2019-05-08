@@ -15,4 +15,16 @@ $(function(){
             });
         }
     });
+
+    chrome.runtime.onMessage.addListener(
+        function(request, sender, sendResponse) {
+            if (request.id === "count_increment") {
+                numOfBlocked ++;
+                $('#num_terms_blocked').text("We have blocked " + numOfBlocked + " spoilers on " + request.host + ".")
+            } else if (request.id === "site_not_supported") {
+                $('#num_terms_blocked').text('site not supported');
+            }
+        });
 });
+
+var numOfBlocked = 0;

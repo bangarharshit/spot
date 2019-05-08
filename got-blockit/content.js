@@ -1,13 +1,3 @@
-const FACEBOOK_FEED_ELEMENTS_SELECTOR    = 'div[data-testid="fbfeed_story"], div[role="article"], #pagelet_trending_tags_and_topics ul > li';
-const GOOGLE_NEWS_FEED_ELEMENTS_SELECTOR = 'a[target="_blank"]';
-const REDDIT_FEED_ELEMENTS_SELECTOR      = '.scrollerItem';
-const SLACK_FEED_ELEMENTS_SELECTOR       = 'ts-message';
-const TWITTER_FEED_ELEMENTS_SELECTOR     = "[data-item-type='tweet'], .trend-item";
-const YOUTUBE_ELEMENTS_SELECTOR          = '.yt-lockup, .related-list-item, .comment-renderer-text';
-const QUORA_ELEMENTS_SELECTOR = '.feed_item, .QueryResult ';
-const INSTAGRAM_ELEMENTS_SELECTOR = 'article';
-const LINKEDIN_ELEMENTS_SELECTOR = '.feed-shared-update-v2, .feed-shared-update-v2--e2e, .feed-shared-update--chat-ui, .feed-shared-update-v2--minimal-padding';
-
 $document = $(document);
 
 const SPOILER_WORDS_LIST = ['#got', 'ady stonehea', 'aidan gillen', 'alfie allen', 'arya stark', 'asoiaf', 'azor ahai', 'baelish', 'baratheon', 'ben crompton', 'bloodraven', 'braavos', 'bran stark', 'briene of tarth', 'brienne of tarth', 'carice van houten', 'casterly rock', 'cersei ', 'conleth hill', 'd.b. weiss', 'daenerys', 'daniel portman', 'david benioff', 'davos seaworth', 'dornish', 'dothraki', 'dreadfort', 'emilia clarke', 'game of thrones', 'gameofthrone', 'gameofthone', 'gamesofthrone', 'greyjoy', 'gwendoline christie', 'highgarden', 'hodor', 'house bolton', 'house stark', 'house tyrell', 'howland reed', 'iain glen', 'ian mcelhinney', 'iron throne', 'isaac hempstead wright', 'jerome flynn', 'john bradley', 'jojen reed', 'jon snow', 'julian glover', 'khaleesi', "king's landing", 'kit harington', 'kit harrington', 'kristian nairn', 'lanister', 'lannisport', 'lannister', 'lena headey', 'liam cunningham', 'littlefinger', 'maisie williams', 'meereen', 'melisandre', 'michele fairley', 'michelle fairley', 'myrcella', 'natalie dormer', 'nathalie emmanue', 'ned stark', 'nikolaj coster-waldau', 'olenna tyrell', 'peter dinklage', 'podrick payne', 'queen of thorns', 'ramsay bolton', 'roose bolton', 'rory mccann', 'sandor clegane', 'sansa stark', 'sophie turner', 'sothoryos', 'stephen dillane', 'targaryen', 'three eyed raven', 'tower of joy', 'tyrion', 'vaes dothrak', 'viserys', 'walder frey', 'westeros', 'white walker', 'whitewalker', 'wildling', 'winterfell'];
@@ -16,73 +6,51 @@ const SPOILER_WORDS_REDDIT = SPOILER_WORDS_LIST.slice();
 SPOILER_WORDS_REDDIT.push("spoiler", "spoilers");
 const SPOILER_WORDS_REDDIT_REGEX = new RegExp(SPOILER_WORDS_REDDIT.join('|'), 'i');
 
-const fbHost = "facebook.com";
-const gNewsHost = "news.google";
-const redditHost = "reddit.com";
-const slackHost = "slack.com";
-const twitterHost = "twitter.com";
-const youtubeHost = "youtube.com";
-const quoraHost = "quora.com";
-const instagramHost = "instagram.com";
-const linkedinHost = "linkedin.com";
+const HOST_LIST_DOM = {
+    "facebook.com": 'div[data-testid="fbfeed_story"], div[role="article"], #pagelet_trending_tags_and_topics ul > li',
+    "news.google": 'a[target="_blank"]',
+    "reddit.com": '.scrollerItem',
+    "slack.com": 'ts-message',
+    "twitter.com": "[data-item-type='tweet'], .trend-item",
+    "youtube.com": '.yt-lockup, .related-list-item, .comment-renderer-text',
+    "quora.com": '.feed_item, .QueryResult ',
+    "instagram.com": 'article',
+    "linkedin.com": '.feed-shared-update-v2, .feed-shared-update-v2--e2e, .feed-shared-update--chat-ui, .feed-shared-update-v2--minimal-padding'
+};
+
+const HOST_LIST_REGEX = new RegExp(Object.keys(HOST_LIST_DOM).join('|'), 'i');
+
+
+
 
 const feedSelectorFunc = function(url, remoteDom) {
     if (!remoteDom) {
         remoteDom = {};
     }
-    if (url.includes(fbHost)) {
-        if (remoteDom[fbHost]) {
-            return remoteDom[fbHost]
-        }
-        return FACEBOOK_FEED_ELEMENTS_SELECTOR;
-    } else if (url.includes(gNewsHost)) {
-        if (remoteDom[gNewsHost]) {
-            return remoteDom[gNewsHost]
-        }
-        return GOOGLE_NEWS_FEED_ELEMENTS_SELECTOR;
-    } else if (url.includes(redditHost)) {
-        if (remoteDom[redditHost]) {
-            return remoteDom[redditHost]
-        }
-        return REDDIT_FEED_ELEMENTS_SELECTOR;
-    } else if (url.includes(slackHost)) {
-        if (remoteDom[slackHost]) {
-            return remoteDom[slackHost]
-        }
-        return SLACK_FEED_ELEMENTS_SELECTOR;
-    } else if (url.includes(twitterHost)) {
-        if (remoteDom[twitterHost]) {
-            return remoteDom[twitterHost]
-        }
-        return TWITTER_FEED_ELEMENTS_SELECTOR;
-    } else if (url.includes(youtubeHost)) {
-        if (remoteDom[youtubeHost]) {
-            return remoteDom[youtubeHost]
-        }
-        return YOUTUBE_ELEMENTS_SELECTOR;
-    } else if (url.includes(quoraHost)) {
-        if (remoteDom[quoraHost]) {
-            return remoteDom[quoraHost]
-        }
-        return QUORA_ELEMENTS_SELECTOR;
-    } else if (url.includes(instagramHost)) {
-        if (remoteDom[instagramHost]) {
-            return remoteDom[instagramHost]
-        }
-        return INSTAGRAM_ELEMENTS_SELECTOR;
-    } else if (url.includes(linkedinHost)) {
-        if (remoteDom[linkedinHost]) {
-            return remoteDom[linkedinHost]
-        }
-        return LINKEDIN_ELEMENTS_SELECTOR;
-    } 
+    var remoteDomRegexp = new RegExp(Object.keys(remoteDom).join('|'), 'i');
+    var host;
+    host = url.match(remoteDomRegexp);
+    if (host) {
+        return {
+            "regexp_string": remoteDom[host],
+            "host": host
+        };
+    }
+    host = url.match(HOST_LIST_REGEX);
+    if (host) {
+        return {
+            "regexp_string": HOST_LIST_DOM[host],
+            "host": host
+        };
+    }
 };
 
 const cleanFeed = function(feedSelector, regex) {
-    $(feedSelector).each(function (index) {
+    $(feedSelector.regexp_string).each(function (index) {
         if (this.classList.contains('glamoured')) {
             return;
         }
+        chrome.runtime.sendMessage({id: "count_increment", host: feedSelector.host});
         let divHeight = $(this).height();
         let matchedSpoiler = this.textContent.match(regex);
         if (matchedSpoiler) {
@@ -148,6 +116,8 @@ $document.ready(function() {
                 }
                 eventListener = eventListenerFunc(feedSelector, regExp);
                 document.addEventListener("DOMNodeInserted", eventListener);
+            } else {
+                chrome.runtime.sendMessage({id: "site_not_supported"});
             }
         }
     });
