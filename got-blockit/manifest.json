@@ -42,7 +42,8 @@
         "*://www.tumblr.com/*",
         "*://www.youtube.com/*",
         "*://www.quora.com/*",
-        "*://www.instagram.com/*"
+        "*://www.instagram.com/*",
+        "*://www.linkedin.com/*"
       ],
       "js": ["jquery-3.1.0.min.js", "content.js", "helper.js"],
       "css": ["content.css"]

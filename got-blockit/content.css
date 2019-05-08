@@ -5,6 +5,7 @@
     height: 100%;
     left: 0;
     top: 0;
+    text-align: center;
     padding: 6px 10px 0px 10px;
     box-sizing: border-box;
     z-index: 100;
@@ -45,16 +46,33 @@
 }
 
 .spoiler-glamour h3 {
-    display: inline;
-    color: #a5d5ff !important;
-    font-size: 35px !important;
-    line-height: 35px !important;
+    position: relative;
+    top: 25%;
+    width: 100%;
+    text-align: center;
+    margin-top: 30px;
     font-weight: normal;
-    margin-top: 12px;
-    opacity: 1;
-    text-transform: none !important;
     background: black !important;
-    padding: 0 !important
+    text-transform: none !important;
+    color: #ffffff !important;
+    font-size: 18px !important;
+}
+
+.spoiler-glamour h3.spoiler-obituary-small {
+    margin-top: 10px;
+    font-size: 14px !important;
+}
+
+.spoiler-glamour h3.reveal-button {
+    border: 2px solid white;
+    background: black;
+    color: white;
+    width: fit-content;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 14px 28px;
+    font-size: 16px;
+    cursor: pointer;
 }
 
 .spoiler-glamour h3.click-to-view-spoiler {

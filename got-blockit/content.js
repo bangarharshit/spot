@@ -6,6 +6,7 @@ const TWITTER_FEED_ELEMENTS_SELECTOR     = "[data-item-type='tweet'], .trend-ite
 const YOUTUBE_ELEMENTS_SELECTOR          = '.yt-lockup, .related-list-item, .comment-renderer-text';
 const QUORA_ELEMENTS_SELECTOR = '.feed_item, .QueryResult ';
 const INSTAGRAM_ELEMENTS_SELECTOR = 'article';
+const LINKEDIN_ELEMENTS_SELECTOR = '.feed-shared-update-v2, .feed-shared-update-v2--e2e, .feed-shared-update--chat-ui, .feed-shared-update-v2--minimal-padding';
 
 $document = $(document);
 
@@ -15,51 +16,66 @@ const SPOILER_WORDS_REDDIT = SPOILER_WORDS_LIST.slice();
 SPOILER_WORDS_REDDIT.push("spoiler", "spoilers");
 const SPOILER_WORDS_REDDIT_REGEX = new RegExp(SPOILER_WORDS_REDDIT.join('|'), 'i');
 
+const fbHost = "facebook.com";
+const gNewsHost = "news.google.com";
+const redditHost = "reddit.com";
+const slackHost = "slack.com";
+const twitterHost = "twitter.com";
+const youtubeHost = "youtube.com";
+const quoraHost = "quora.com";
+const instagramHost = "instagram.com";
+const linkedinHost = "linkedin.com";
+
 const feedSelectorFunc = function(url, remoteDom) {
     if (!remoteDom) {
         remoteDom = {};
     }
-    if (url.includes("facebook.com")) {
-        if (remoteDom["facebook.com"]) {
-            return remoteDom["facebook.com"]
+    if (url.includes(fbHost)) {
+        if (remoteDom[fbHost]) {
+            return remoteDom[fbHost]
         }
         return FACEBOOK_FEED_ELEMENTS_SELECTOR;
-    } else if (url.includes("news.google.com")) {
-        if (remoteDom["news.google.com"]) {
-            return remoteDom["news.google.com"]
+    } else if (url.includes(gNewsHost)) {
+        if (remoteDom[gNewsHost]) {
+            return remoteDom[gNewsHost]
         }
         return GOOGLE_NEWS_FEED_ELEMENTS_SELECTOR;
-    } else if (url.includes("reddit.com")) {
-        if (remoteDom["reddit.com"]) {
-            return remoteDom["reddit.com"]
+    } else if (url.includes(redditHost)) {
+        if (remoteDom[redditHost]) {
+            return remoteDom[redditHost]
         }
         return REDDIT_FEED_ELEMENTS_SELECTOR;
-    } else if (url.includes("slack.com")) {
-        if (remoteDom["slack.com"]) {
-            return remoteDom["slack.com"]
+    } else if (url.includes(slackHost)) {
+        if (remoteDom[slackHost]) {
+            return remoteDom[slackHost]
         }
         return SLACK_FEED_ELEMENTS_SELECTOR;
-    } else if (url.includes("twitter.com")) {
-        if (remoteDom["twitter.com"]) {
-            return remoteDom["twitter.com"]
+    } else if (url.includes(twitterHost)) {
+        if (remoteDom[twitterHost]) {
+            return remoteDom[twitterHost]
         }
         return TWITTER_FEED_ELEMENTS_SELECTOR;
-    } else if (url.includes("youtube.com")) {
-        if (remoteDom["youtube.com"]) {
-            return remoteDom["youtube.com"]
+    } else if (url.includes(youtubeHost)) {
+        if (remoteDom[youtubeHost]) {
+            return remoteDom[youtubeHost]
         }
         return YOUTUBE_ELEMENTS_SELECTOR;
-    } else if (url.includes("quora.com")) {
-        if (remoteDom["quora.com"]) {
-            return remoteDom["quora.com"]
+    } else if (url.includes(quoraHost)) {
+        if (remoteDom[quoraHost]) {
+            return remoteDom[quoraHost]
         }
         return QUORA_ELEMENTS_SELECTOR;
-    } else if (url.includes("instagram.com")) {
-        if (remoteDom["instagram.com"]) {
-            return remoteDom["instagram.com"]
+    } else if (url.includes(instagramHost)) {
+        if (remoteDom[instagramHost]) {
+            return remoteDom[instagramHost]
         }
         return INSTAGRAM_ELEMENTS_SELECTOR;
-    }
+    } else if (url.includes(linkedinHost)) {
+        if (remoteDom[linkedinHost]) {
+            return remoteDom[linkedinHost]
+        }
+        return LINKEDIN_ELEMENTS_SELECTOR;
+    } 
 };
 
 const cleanFeed = function(feedSelector, regex) {
@@ -67,30 +83,40 @@ const cleanFeed = function(feedSelector, regex) {
         if (this.classList.contains('glamoured')) {
             return;
         }
-        var matchedSpoiler = this.textContent.match(regex);
+        let divHeight = $(this).height();
+        let matchedSpoiler = this.textContent.match(regex);
         if (matchedSpoiler) {
-            exileTraitorousSpoiler($(this), matchedSpoiler[0]);
+            exileTraitorousSpoiler($(this), matchedSpoiler[0], isBigDom(divHeight));
         }
     });
 };
 
 const regexFunc = function (url) {
-    if (url.includes("reddit.com")) {
+    if (url.match(GOT_SUBREDDITS_REGEX)) {
         return SPOILER_WORDS_REDDIT_REGEX;
     } else {
         return SPOILER_WORDS_REGEX;
     }
 };
 
-const exileTraitorousSpoiler = function($traitor, dark_words_of_spoilage) {
+const exileTraitorousSpoiler = function($traitor, dark_words_of_spoilage, isBigDom) {
     var $glamour, capitalized_spoiler_words, glamour_string;
     capitalized_spoiler_words = dark_words_of_spoilage.capitalizeFirstLetter();
     $traitor.addClass('glamoured');
-    var textToShow = 'A potential spoiler here is detected as the post mentions ' + capitalized_spoiler_words;
-    glamour_string = "<div class='spoiler-glamour' <h3 class='spoiler-obituary'>" + textToShow + ".</h3> <h3 class='click-to-view-spoiler' >Click to view spoiler (!!!)</h3> </div>";
+    if (isBigDom) {
+        glamour_string = "<div class='spoiler-glamour'> <h3 class='spoiler-obituary'> A potential spoiler here is detected as the post mentions<b> " + capitalized_spoiler_words + "</b>.</h3> <h3 class='reveal-button'>REVEAL</h3> </div>";
+    } else {
+        glamour_string = "<div class='spoiler-glamour'> <h3 class='spoiler-obituary-small'> A potential spoiler here is detected as the post mentions<b> " + capitalized_spoiler_words + "</b>. <u class='reveal-button-small'>REVEAL</u> </h3></div>";
+    }
     $(glamour_string).appendTo($traitor);
     $glamour = $traitor.find('.spoiler-glamour');
-    return $glamour.on('click', function(ev) {
+    var $revealButton;
+    if(isBigDom) {
+        $revealButton = $traitor.find('.reveal-button');
+    } else {
+        $revealButton = $traitor.find('.reveal-button-small');
+    }
+    return $revealButton.on('click', function(ev) {
         ev.stopPropagation();
         ev.preventDefault();
         if (!confirm("Are you sure you want to view this potentially spoiler-ific " + capitalized_spoiler_words + "?")) {
@@ -101,6 +127,10 @@ const exileTraitorousSpoiler = function($traitor, dark_words_of_spoilage) {
             return $glamour.remove();
         }), 3500);
     });
+};
+
+const isBigDom = function(divHeight) {
+  return divHeight > 200;
 };
 
 $document.ready(function() {
@@ -116,7 +146,7 @@ $document.ready(function() {
                 if (eventListener) {
                     document.removeEventListener("DOMNodeInserted", eventListener);
                 }
-                eventListener = eventListenerFunc(feedSelector, regex);
+                eventListener = eventListenerFunc(feedSelector, regExp);
                 document.addEventListener("DOMNodeInserted", eventListener);
             }
         }
