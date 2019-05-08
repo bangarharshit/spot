@@ -32,21 +32,21 @@ const feedSelectorFunc = function(url, remoteDom) {
     host = url.match(remoteDomRegexp);
     if (host) {
         return {
-            "regexp_string": remoteDom[host],
+            "identifier": remoteDom[host],
             "host": host
         };
     }
     host = url.match(HOST_LIST_REGEX);
     if (host) {
         return {
-            "regexp_string": HOST_LIST_DOM[host],
+            "identifier": HOST_LIST_DOM[host],
             "host": host
         };
     }
 };
 
 const cleanFeed = function(feedSelector, regex) {
-    $(feedSelector.regexp_string).each(function (index) {
+    $(feedSelector.identifier).each(function (index) {
         if (this.classList.contains('glamoured')) {
             return;
         }
@@ -126,7 +126,7 @@ $document.ready(function() {
 const eventListenerFunc = function(feedSelector, regex) {
   return throttle(function (e) {
       cleanFeed(feedSelector, regex);
-  }, 1000);
+  }, 2000);
 };
 
 var eventListener;
