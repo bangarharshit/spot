@@ -37,7 +37,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 numOfBlocked++;
                 blockedTextFunc(localNumOfBlocked, numOfBlocked);
             } else if (request.id === "site_not_supported") {
-                $('#num_terms_blocked').text(request.url + ' is not supported.');
+                $('#enable_plugin_text').text(request.url + ' is not supported.');
             } else if (request.id === 'url_fetched') {
                 $('#disabled_plugin').hide();
 
