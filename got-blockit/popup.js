@@ -1,7 +1,15 @@
-$(function(){
+document.addEventListener('DOMContentLoaded', function () {
+    chrome.tabs.query({
+        active: true,
+        currentWindow: true
+    }, function(tabs) {
+        chrome.tabs.sendMessage(tabs[0].id, {
+            id: 'fetch_url'
+        });
+    });
 
-    chrome.storage.sync.get('keyword',function(keyword){
-        $('#keyword').text(keyword);
+    chrome.storage.sync.get('keyword',function(response){
+        document.getElementById("keyword").value = response.keyword;
     });
 
 
@@ -23,6 +31,8 @@ $(function(){
                 $('#num_terms_blocked').text("We have blocked " + numOfBlocked + " spoilers on " + request.host + ".")
             } else if (request.id === "site_not_supported") {
                 $('#num_terms_blocked').text('site not supported');
+            } else if (request.id === 'url_fetched') {
+                $('#num_terms_blocked').text("We are blocking on " + request.host + ".")
             }
         });
 });

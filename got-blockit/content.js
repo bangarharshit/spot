@@ -24,17 +24,16 @@ const HOST_LIST_REGEX = new RegExp(Object.keys(HOST_LIST_DOM).join('|'), 'i');
 
 
 const feedSelectorFunc = function(url, remoteDom) {
-    if (!remoteDom) {
-        remoteDom = {};
-    }
-    var remoteDomRegexp = new RegExp(Object.keys(remoteDom).join('|'), 'i');
-    var host;
-    host = url.match(remoteDomRegexp);
-    if (host) {
-        return {
-            "identifier": remoteDom[host],
-            "host": host
-        };
+    if (remoteDom) {
+        var remoteDomRegexp = new RegExp(Object.keys(remoteDom).join('|'), 'i');
+        var host;
+        host = url.match(remoteDomRegexp);
+        if (host) {
+            return {
+                "identifier": remoteDom[host],
+                "host": host
+            };
+        }
     }
     host = url.match(HOST_LIST_REGEX);
     if (host) {
@@ -136,6 +135,12 @@ const GOT_RELATED_SUBREDDITS = ['gameofthrones', 'asoiaf', 'iceandfire', 'agotbo
 
 const GOT_SUBREDDITS_REGEX = new RegExp('(\/r\/)' + GOT_RELATED_SUBREDDITS.join('|'), 'i');
 
+chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
+    if ((msg.id === 'fetch_url')) {
+        let host = feedSelectorFunc(window.location.toString().toLowerCase()).host;
+        chrome.runtime.sendMessage({'id': 'url_fetched', 'host': host})
+    }
+});
 
 const throttle = (func, limit) => {
     let lastFunc;
