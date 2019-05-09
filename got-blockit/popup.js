@@ -8,8 +8,14 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    chrome.storage.sync.get('keyword',function(response){
-        document.getElementById("keyword").value = response.keyword;
+    chrome.storage.sync.get(['keyword', 'numOfBlocked'],function(response){
+        if (response.keyword) {
+            document.getElementById("keyword").value = response.keyword;
+        }
+        if (response.numOfBlocked) {
+            numOfBlocked = response.numOfBlocked;
+            blockedTextFunc(0, numOfBlocked);
+        }
     });
 
 
@@ -27,14 +33,23 @@ document.addEventListener('DOMContentLoaded', function () {
     chrome.runtime.onMessage.addListener(
         function(request, sender, sendResponse) {
             if (request.id === "count_increment") {
-                numOfBlocked ++;
-                $('#num_terms_blocked').text("We have blocked " + numOfBlocked + " spoilers on " + request.host + ".")
+                localNumOfBlocked ++;
+                numOfBlocked++;
+                blockedTextFunc(localNumOfBlocked, numOfBlocked);
             } else if (request.id === "site_not_supported") {
-                $('#num_terms_blocked').text('site not supported');
+                $('#num_terms_blocked').text(request.url + ' is not supported.');
             } else if (request.id === 'url_fetched') {
-                $('#num_terms_blocked').text("We are blocking on " + request.host + ".")
+                $('#disabled_plugin').hide();
+
+                $('#enable_plugin_text').text("Enable Game of spoils on " + request.host + ".");
+                $('#enable_plugin_button').show();
             }
         });
 });
 
+const blockedTextFunc = function (localNum, numTotal) {
+    $('#num_terms_blocked').text("Blocked on this page: " + localNum + ". Total blocked: " + numTotal);
+};
+
 var numOfBlocked = 0;
+var localNumOfBlocked = 0;

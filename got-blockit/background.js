@@ -30,7 +30,24 @@ chrome.runtime.onConnect.addListener(function(port) {
             });
         }
     });
+
+    chrome.storage.sync.get('numOfBlocked', function (response) {
+       if (response.numOfBlocked) {
+           numOfBlocked = response.numOfBlocked;
+       }
+    });
+
+    chrome.runtime.onMessage.addListener(
+        function(request, sender, sendResponse) {
+            if (request.id === "count_increment" && numOfBlocked) {
+                numOfBlocked++;
+                chrome.storage.sync.set({'numOfBlocked': numOfBlocked});
+            }
+        });
 });
+
+var numOfBlocked;
+
 
 var domData;
 var spoilerData;

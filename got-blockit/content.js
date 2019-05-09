@@ -116,7 +116,7 @@ $document.ready(function() {
                 eventListener = eventListenerFunc(feedSelector, regExp);
                 document.addEventListener("DOMNodeInserted", eventListener);
             } else {
-                chrome.runtime.sendMessage({id: "site_not_supported"});
+                chrome.runtime.sendMessage({id: "site_not_supported", url: url});
             }
         }
     });

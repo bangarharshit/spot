@@ -8,14 +8,19 @@
     </head>
     <body>
     <h2 class="center">Game of spoils</h2>
-    <span class="center_vertical">
-        <label class="switch_title">Enable Game of spoils on</label>
+    <span class="center_vertical" id="enable_plugin_button" style="display: none">
+        <label class="switch_title" id="enable_plugin_text">Enable Game of spoils on</label>
         <label class="switch" class="switch_subtitle">
             <input type="checkbox" checked>
             <span class="slider round"></span>
         </label>
     </span>
-    <div class="center" id="num_terms_blocked"></div>
+    <span class="center_vertical" id="disabled_plugin">
+        <label class="switch_title" id="disabled_plugin_text">Looking for support...</label>
+    </span>
+    <div class="center" id="num_terms_blocked">
+        Blocked on this page: 0. Total blocked: 0
+    </div>
     <div class="center">
         <input type="text" id="keyword" placeholder="Enter extra terms to block">
     </div>
