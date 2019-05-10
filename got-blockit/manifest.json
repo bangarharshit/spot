@@ -1,9 +1,9 @@
 {
   "manifest_version": 2,
 
-  "name": "GameofSpoils: Spoiler Blocker for Game of Thrones and your other favourite movies",
+  "name": "GameofSpoils: Spoiler Blocker",
   "short_name": "GameOfSpoils",
-  "description": "Spoiler blocking plugin for your Facebook, Twitter, Reddit, and Google News feeds.",
+  "description": "Spoiler blocker for Game of Thrones and your other favourite movies on Facebook, Twitter, Reddit, and Google News feeds.",
   "version": "0.0.1",
 
   "browser_action": {
