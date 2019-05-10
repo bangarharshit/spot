@@ -149,6 +149,10 @@ body {
     background: red;
 }
 
+#div_status_beta {
+    padding-left: 10px;
+}
+
 .btn {
     background-color: red;
     border: none;
