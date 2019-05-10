@@ -18,6 +18,10 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
+    $('#bugreport').click(function (e) {
+        chrome.tabs.create({url: "https://forms.gle/7spd41hCoNa9Ve5c9"});
+        return false;
+    });
 
     $('#keywordsubmit').click(function(){
         var newKeyWord = $('#keyword').val();
