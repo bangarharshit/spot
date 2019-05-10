@@ -36,19 +36,15 @@ document.addEventListener('DOMContentLoaded', function () {
                 localNumOfBlocked ++;
                 numOfBlocked++;
                 blockedTextFunc(localNumOfBlocked, numOfBlocked);
-            } else if (request.id === "site_not_supported") {
-                $('#enable_plugin_text').text(request.url + ' is not supported.');
             } else if (request.id === 'url_fetched') {
-                $('#disabled_plugin').hide();
-
-                $('#enable_plugin_text').text("Enable Game of spoils on " + request.host + ".");
-                $('#enable_plugin_button').show();
+                $('#enable_plugin_text').text("Enable Game of spoils on <b>" + request.host + "</b>.");
             }
         });
 });
 
 const blockedTextFunc = function (localNum, numTotal) {
-    $('#num_terms_blocked').text("Blocked on this page: " + localNum + ". Total blocked: " + numTotal);
+    $('#page_blocked_count').text(localNum);
+    $('#total_blocked_count').text(numTotal);
 };
 
 var numOfBlocked = 0;
