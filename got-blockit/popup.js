@@ -18,14 +18,16 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    $('#keyword_input').on("change keyword input", throttle(function(e){
+    $("#keyword_submit_button").on('click', function(event){
         var newKeyWord = $('#keyword_input').val();
         if (newKeyWord){
             chrome.storage.sync.set({'gos_keyword': newKeyWord.toLowerCase()}, function() {
-
+                chrome.tabs.query({active: true, currentWindow: true}, function (arrayOfTabs) {
+                    chrome.tabs.reload(arrayOfTabs[0].id);
+                });
             });
         }
-    }, 500));
+    });
 
     chrome.runtime.onMessage.addListener(
         function(request, sender, sendResponse) {
