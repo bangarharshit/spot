@@ -6,24 +6,24 @@ chrome.runtime.onConnect.addListener(function(port) {
     });
     port.onMessage.addListener(function(msg) {
         if (msg.request === "fetchkeywordAndPreference") {
-            chrome.storage.sync.get(['keyword', 'disabled'],function(result){
-                var keyword = result.keyword;
-                if (!keyword) {
-                    keyword = '';
+            chrome.storage.sync.get(['gos_keyword', 'disabled'],function(result){
+                var extra_keyword = result.gos_keyword;
+                if (!extra_keyword) {
+                    extra_keyword = '';
                 }
                 if (!disconnected) {
-                    port.postMessage({'keyword': keyword.toLowerCase(), 'disabled': false, 'remoteData': domData, 'spoilerData': spoilerData});
+                    port.postMessage({'keyword': extra_keyword.toLowerCase(), 'disabled': false, 'remoteData': domData, 'spoilerData': spoilerData});
                 }
                 db.collection("config").doc('dom_structure').get().then((doc) => {
                     domData = doc.data();
                     if (!disconnected && domData) {
-                        port.postMessage({'keyword': keyword.toLowerCase(), 'disabled': false, 'remoteData': domData, 'spoilerData': spoilerData});
+                        port.postMessage({'keyword': extra_keyword.toLowerCase(), 'disabled': false, 'remoteData': domData, 'spoilerData': spoilerData});
                     }
                 });
                 db.collection("config").doc("spoilers").get().then((doc) => {
                     spoilerData = doc.data();
                     if (!disconnected && spoilerData) {
-                        port.postMessage({'keyword': keyword.toLowerCase(), 'disabled': false, 'remoteData': domData, 'spoilerData': spoilerData});
+                        port.postMessage({'keyword': extra_keyword.toLowerCase(), 'disabled': false, 'remoteData': domData, 'spoilerData': spoilerData});
                     }
                 });
 

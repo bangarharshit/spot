@@ -5,6 +5,7 @@
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
         <title>Game of spoils(GOS)</title>
         <script src="jquery-3.1.0.min.js"></script>
+        <script src="helper.js"></script>
         <script src="popup.js"></script>
     </head>
     <body id="default_theme">
@@ -33,7 +34,11 @@
 
     <div id="separator0" class="separator" style="display: block;"></div>
     <div id="div_add_extra_keyword" class="menu-entry" style="display: block;">Add extra keywords to block</div>
+    <div class="menu-entry-keyword">
+        <input type="text" id="keyword_input" placeholder="Jon snow...">
+    </div>
 
+    <div id="separator1" class="separator" style="display: block;"></div>
 
     <div id="div_slideout" style="cursor: pointer;">
         <div style="margin: 5px 0px;">
@@ -41,11 +46,12 @@
         </div>
     </div>
     <div id="div_shareout">
-        <button class="btn"><a class="fa fa-facebook" href="http://twitter.com/share?url=https://gos.com&text=Game of spoils" target="_blank"></a></button>
-        <button class="btn"><a class="fa fa-twitter" href="http://twitter.com/share?url=https://gos.com&text=Game of spoils" target="_blank"></a></button>
-        <button class="btn"><a class="fa fa-instagram" href="http://twitter.com/share?url=https://gos.com&text=Game of spoils" target="_blank"></a></button>
-        <button class="btn"><a class="fa fa-reddit" href="http://twitter.com/share?url=https://gos.com&text=Game of spoils" target="_blank"></a></button>
-        <button class="btn"><a class="fa fa-linkedin" href="http://twitter.com/share?url=https://gos.com&text=Game of spoils" target="_blank"></a></button>
+        <button class="btn"><a class="fa fa-facebook" href="http://www.facebook.com/sharer/sharer.php?u=https://www.gos.com" target="_blank"></a></button>
+        <button class="btn"><a class="fa fa-twitter" href="http://twitter.com/share?url=https://www.gos.com&text=Game of spoils" target="_blank"></a></button>
+        <button class="btn"><a class="fa fa-envelope" href="mailto:?subject=Game of Spoils&body=Please install gos on https://www.gos.com" target="_blank"></a></button>
+        <button class="btn"><a class="fa fa-reddit" href="http://reddit.com/submit?url=https://www.gos.com&title=<TITLE>" target="_blank"></a></button>
+        <button class="btn"><a class="fa fa-linkedin" href="https://www.linkedin.com/shareArticle?mini=true&url=http://www.gos.com&title=Game%20of%20Spoils&summary=Chrome%20extension%20for%20blocking%20spoilers&source=LinkedIn
+" target="_blank"></a></button>
     </div>
     </body>
 </html>

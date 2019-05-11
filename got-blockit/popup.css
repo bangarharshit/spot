@@ -168,3 +168,12 @@ body {
 .fa {
     color: white;
 }
+
+.menu-entry-keyword {
+    padding: 4px 4px 4px 10px;
+}
+
+#keyword_input {
+    line-height: 28px;
+    font-size: 16px;
+}

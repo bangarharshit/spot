@@ -58,11 +58,11 @@ const cleanFeed = function(feedSelector, regex) {
     });
 };
 
-const regexFunc = function (url) {
-    if (url.match(GOT_SUBREDDITS_REGEX)) {
-        return SPOILER_WORDS_REDDIT_REGEX;
+const regexFunc = function (url, keyword) {
+    if (keyword) {
+        return  new RegExp(SPOILER_WORDS_LIST.slice().concat(keyword.split(',')).join('|'), 'i');
     } else {
-        return SPOILER_WORDS_REGEX;
+        return  SPOILER_WORDS_REGEX;
     }
 };
 
@@ -106,7 +106,7 @@ $document.ready(function() {
     port.onMessage.addListener(function(msg) {
         if (!msg.disabled) {
             var url = window.location.toString().toLowerCase();
-            var regExp = regexFunc(url);
+            var regExp = regexFunc(url, msg.keyword);
             var feedSelector = feedSelectorFunc(url, msg.remoteData);
             if (feedSelector) {
                 cleanFeed(feedSelector, regExp);
@@ -139,24 +139,3 @@ chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
         chrome.runtime.sendMessage({'id': 'url_fetched', 'host': host})
     }
 });
-
-const throttle = (func, limit) => {
-    let lastFunc;
-    let lastRan;
-    return function() {
-        const context = this;
-        const args = arguments;
-        if (!lastRan) {
-            func.apply(context, args);
-            lastRan = Date.now()
-        } else {
-            clearTimeout(lastFunc);
-            lastFunc = setTimeout(function() {
-                if ((Date.now() - lastRan) >= limit) {
-                    func.apply(context, args);
-                    lastRan = Date.now()
-                }
-            }, limit - (Date.now() - lastRan))
-        }
-    }
-};

@@ -8,9 +8,9 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    chrome.storage.sync.get(['keyword', 'numOfBlocked'],function(response){
-        if (response.keyword) {
-            document.getElementById("keyword").value = response.keyword;
+    chrome.storage.sync.get(['gos_keyword', 'numOfBlocked'],function(response){
+        if (response.gos_keyword) {
+            document.getElementById("keyword_input").value = response.gos_keyword;
         }
         if (response.numOfBlocked) {
             numOfBlocked = response.numOfBlocked;
@@ -18,16 +18,14 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    $('#keywordsubmit').click(function(){
-        var newKeyWord = $('#keyword').val();
+    $('#keyword_input').on("change keyword input", throttle(function(e){
+        var newKeyWord = $('#keyword_input').val();
         if (newKeyWord){
-            chrome.storage.sync.set({'keyword': newKeyWord.toLowerCase()}, function(){
-                chrome.tabs.query({active:true,currentWindow: true}, function(tabs){
-                    chrome.tabs.reload(tabs[0].id);
-                });
+            chrome.storage.sync.set({'gos_keyword': newKeyWord.toLowerCase()}, function() {
+
             });
         }
-    });
+    }, 500));
 
     chrome.runtime.onMessage.addListener(
         function(request, sender, sendResponse) {
