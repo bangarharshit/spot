@@ -99,19 +99,17 @@ const isBigDom = function(divHeight) {
 
 $document.ready(function() {
     chrome.runtime.onMessage.addListener(function(msg) {
-        if (msg.id === 'fetchedkeywordAndPreferences') {
-            if (!msg.disabled) {
-                var url = window.location.toString().toLowerCase();
-                var regExp = regexFunc(url, msg.keyword);
-                var feedSelector = feedSelectorFunc(url, msg.remoteData);
-                if (feedSelector) {
-                    cleanFeed(feedSelector, regExp);
-                    if (eventListener) {
-                        document.removeEventListener("DOMNodeInserted", eventListener);
-                    }
-                    eventListener = eventListenerFunc(feedSelector, regExp);
-                    document.addEventListener("DOMNodeInserted", eventListener);
+        if (msg.id === "fetchedkeywordAndPreferences") {
+            var url = window.location.toString().toLowerCase();
+            var regExp = regexFunc(url, msg.keyword);
+            var feedSelector = feedSelectorFunc(url, msg.remoteData);
+            if (feedSelector) {
+                cleanFeed(feedSelector, regExp);
+                if (eventListener) {
+                    document.removeEventListener("DOMNodeInserted", eventListener);
                 }
+                eventListener = eventListenerFunc(feedSelector, regExp);
+                document.addEventListener("DOMNodeInserted", eventListener);
             }
         }
     });

@@ -47,7 +47,8 @@
   "permissions": [
     "activeTab",
     "storage",
-    "declarativeContent"
+    "declarativeContent",
+    "tabs"
   ],
   "content_security_policy":"script-src 'self' https://ssl.google-analytics.com https://www.gstatic.com/ https://*.firebaseio.com https://www.googleapis.com; object-src 'self'"
 

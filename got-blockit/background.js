@@ -1,5 +1,3 @@
-chrome.runtime.onConnect.addListener(function(port) {
-});
 chrome.storage.sync.get('numOfBlocked', function (response) {
     if (response.numOfBlocked) {
         numOfBlocked = numOfBlocked + response.numOfBlocked;
@@ -12,16 +10,15 @@ chrome.runtime.onMessage.addListener(
             numOfBlocked++;
             chrome.tabs.query({active: true, currentWindow: true}, function (arrayOfTabs) {
                 var tabId = arrayOfTabs[0].id;
-                var currentBlockedCount = numBlockedObject[tabId];
-                if (currentBlockedCount) {
-                    currentBlockedCount++;
-                } else {
-                    currentBlockedCount = 1;
+                var currentTabBlockedCount = numBlockedObject[tabId];
+                if (!currentTabBlockedCount) {
+                    currentTabBlockedCount = 0;
                 }
-                numBlockedObject[tabId] = currentBlockedCount;
-                chrome.runtime.sendMessage({id: "count_incremented", tabId: tabId, currentBlockedCount: currentBlockedCount});
-                if (localNumOfBlocked > 0) {
-                    chrome.browserAction.setBadgeText({text: currentBlockedCount.toString(), tab: arrayOfTabs[0].id});
+                currentTabBlockedCount++;
+                numBlockedObject[tabId] = currentTabBlockedCount;
+                chrome.runtime.sendMessage({id: "count_incremented", tabId: tabId, currentTabBlockedCount: currentTabBlockedCount});
+                if (currentTabBlockedCount > 0) {
+                    chrome.browserAction.setBadgeText({text: currentTabBlockedCount.toString(), tabId: tabId});
                 }
             });
             if (numOfBlocked % 50 === 0) { // rate limiting - find a better way.
@@ -29,33 +26,62 @@ chrome.runtime.onMessage.addListener(
             }
         } else if (request.id === "fetchkeywordAndPreference") {
             chrome.storage.sync.get(['gos_keyword', 'disabled'],function(result){
-                if (!result.disabled) {
-                    result.disabled = false;
+                if (result.disabled) {
+                    return;
                 }
                 var extra_keyword = result.gos_keyword;
                 if (!extra_keyword) {
                     extra_keyword = '';
                 }
-                chrome.runtime.sendMessage({'id': 'fetchedkeywordAndPreferences', 'keyword': extra_keyword.toLowerCase(), 'disabled': result.disabled, 'remoteData': domData, 'spoilerData': spoilerData});
+                sendMessageToContent( 'fetchedkeywordAndPreferences', extra_keyword.toLowerCase());
                 db.collection("config").doc('dom_structure').get().then((doc) => {
                     domData = doc.data();
                     if (domData) {
-                        chrome.runtime.sendMessage({'id': 'fetchedkeywordAndPreferences','keyword': extra_keyword.toLowerCase(), 'disabled': result.disabled, 'remoteData': domData, 'spoilerData': spoilerData});
+                        sendMessageToContent( 'fetchedkeywordAndPreferences', extra_keyword.toLowerCase());
                     }
                 });
                 db.collection("config").doc("spoilers").get().then((doc) => {
                     spoilerData = doc.data();
                     if (spoilerData) {
-                        chrome.runtime.sendMessage({'id': 'fetchedkeywordAndPreferences', 'keyword': extra_keyword.toLowerCase(), 'disabled': result.disabled, 'remoteData': domData, 'spoilerData': spoilerData});
+                        sendMessageToContent( 'fetchedkeywordAndPreferences', extra_keyword.toLowerCase());
                     }
                 });
             })
         } else if (request.id === 'fetchNumOfBlocked'){
             var tabId = request.tabId;
             var numBlockedCountForTab = numBlockedObject[tabId];
+            if (!numBlockedCountForTab) {
+                numBlockedCountForTab = 0;
+            }
             chrome.runtime.sendMessage({'id': 'fetched_count', 'numBlockedCountForTab': numBlockedCountForTab});
+        } else if (request.id === 'pause') {
+            chrome.storage.sync.set({'disabled': true}, function() {
+                chrome.runtime.sendMessage({'id': 'paused'});
+            });
+        } else if (request.id === 'resume') {
+            chrome.storage.sync.set({'disabled': false}, function() {
+                chrome.runtime.sendMessage({'id': 'resumed'});
+            });
+        } else if (request.id === 'save_keyword') {
+            chrome.storage.sync.set({'gos_keyword': request.keyword}, function() {
+                chrome.runtime.sendMessage({'id': 'keyword_saved'});
+            });
         }
     });
+
+
+const sendMessageToContent = function (id, keyword) {
+    chrome.tabs.query({active: true, currentWindow: true}, function (arrayOfTabs) {
+        if (arrayOfTabs[0]) {
+            chrome.tabs.sendMessage(arrayOfTabs[0].id, {
+                'id': id,
+                'keyword': keyword,
+                'remoteData': domData,
+                'spoilerData': spoilerData
+            });
+        }
+    });
+};
 
 var numBlockedObject = {};
 var numOfBlocked = 0;
