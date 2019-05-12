@@ -1,54 +1,64 @@
 chrome.runtime.onConnect.addListener(function(port) {
-    console.assert(port.name === "gost");
-    var disconnected;
-    port.onDisconnect.addListener(function (port) {
-        disconnected = true;
-    });
-    port.onMessage.addListener(function(msg) {
-        if (msg.request === "fetchkeywordAndPreference") {
+});
+chrome.storage.sync.get('numOfBlocked', function (response) {
+    if (response.numOfBlocked) {
+        numOfBlocked = numOfBlocked + response.numOfBlocked;
+    }
+});
+
+chrome.runtime.onMessage.addListener(
+    function(request, sender, sendResponse) {
+        if (request.id === "count_increment") {
+            numOfBlocked++;
+            chrome.tabs.query({active: true, currentWindow: true}, function (arrayOfTabs) {
+                var tabId = arrayOfTabs[0].id;
+                var currentBlockedCount = numBlockedObject[tabId];
+                if (currentBlockedCount) {
+                    currentBlockedCount++;
+                } else {
+                    currentBlockedCount = 1;
+                }
+                numBlockedObject[tabId] = currentBlockedCount;
+                chrome.runtime.sendMessage({id: "count_incremented", tabId: tabId, currentBlockedCount: currentBlockedCount});
+                if (localNumOfBlocked > 0) {
+                    chrome.browserAction.setBadgeText({text: currentBlockedCount.toString(), tab: arrayOfTabs[0].id});
+                }
+            });
+            if (numOfBlocked % 50 === 0) { // rate limiting - find a better way.
+                chrome.storage.sync.set({'numOfBlocked': numOfBlocked});
+            }
+        } else if (request.id === "fetchkeywordAndPreference") {
             chrome.storage.sync.get(['gos_keyword', 'disabled'],function(result){
+                if (!result.disabled) {
+                    result.disabled = false;
+                }
                 var extra_keyword = result.gos_keyword;
                 if (!extra_keyword) {
                     extra_keyword = '';
                 }
-                if (!disconnected) {
-                    port.postMessage({'keyword': extra_keyword.toLowerCase(), 'disabled': false, 'remoteData': domData, 'spoilerData': spoilerData});
-                }
+                chrome.runtime.sendMessage({'id': 'fetchedkeywordAndPreferences', 'keyword': extra_keyword.toLowerCase(), 'disabled': result.disabled, 'remoteData': domData, 'spoilerData': spoilerData});
                 db.collection("config").doc('dom_structure').get().then((doc) => {
                     domData = doc.data();
-                    if (!disconnected && domData) {
-                        port.postMessage({'keyword': extra_keyword.toLowerCase(), 'disabled': false, 'remoteData': domData, 'spoilerData': spoilerData});
+                    if (domData) {
+                        chrome.runtime.sendMessage({'id': 'fetchedkeywordAndPreferences','keyword': extra_keyword.toLowerCase(), 'disabled': result.disabled, 'remoteData': domData, 'spoilerData': spoilerData});
                     }
                 });
                 db.collection("config").doc("spoilers").get().then((doc) => {
                     spoilerData = doc.data();
-                    if (!disconnected && spoilerData) {
-                        port.postMessage({'keyword': extra_keyword.toLowerCase(), 'disabled': false, 'remoteData': domData, 'spoilerData': spoilerData});
+                    if (spoilerData) {
+                        chrome.runtime.sendMessage({'id': 'fetchedkeywordAndPreferences', 'keyword': extra_keyword.toLowerCase(), 'disabled': result.disabled, 'remoteData': domData, 'spoilerData': spoilerData});
                     }
                 });
-
-            });
+            })
+        } else if (request.id === 'fetchNumOfBlocked'){
+            var tabId = request.tabId;
+            var numBlockedCountForTab = numBlockedObject[tabId];
+            chrome.runtime.sendMessage({'id': 'fetched_count', 'numBlockedCountForTab': numBlockedCountForTab});
         }
     });
 
-    chrome.storage.sync.get('numOfBlocked', function (response) {
-       if (response.numOfBlocked) {
-           numOfBlocked = response.numOfBlocked;
-       }
-    });
-
-    chrome.runtime.onMessage.addListener(
-        function(request, sender, sendResponse) {
-            if (request.id === "count_increment" && numOfBlocked) {
-                numOfBlocked++;
-                chrome.storage.sync.set({'numOfBlocked': numOfBlocked});
-            }
-        });
-});
-
-var numOfBlocked;
-
-
+var numBlockedObject = {};
+var numOfBlocked = 0;
 var domData;
 var spoilerData;
 var firebaseConfig = {
@@ -63,7 +73,6 @@ var firebaseConfig = {
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 var db = firebase.firestore();
-
 
 
 

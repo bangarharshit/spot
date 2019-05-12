@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', function () {
         currentWindow: true
     }, function(tabs) {
         chrome.tabs.sendMessage(tabs[0].id, {
-            id: 'fetch_url'
+            id: 'fetchNumOfBlocked'
         });
     });
 
@@ -13,8 +13,8 @@ document.addEventListener('DOMContentLoaded', function () {
             document.getElementById("keyword_input").value = response.gos_keyword;
         }
         if (response.numOfBlocked) {
-            numOfBlocked = response.numOfBlocked;
-            blockedTextFunc(0, numOfBlocked);
+            remoteNumOfBlocked = response.numOfBlocked;
+            blockedTextFunc(0, remoteNumOfBlocked);
         }
     });
 
@@ -22,29 +22,45 @@ document.addEventListener('DOMContentLoaded', function () {
         var newKeyWord = $('#keyword_input').val();
         if (newKeyWord){
             chrome.storage.sync.set({'gos_keyword': newKeyWord.toLowerCase()}, function() {
-                chrome.tabs.query({active: true, currentWindow: true}, function (arrayOfTabs) {
-                    chrome.tabs.reload(arrayOfTabs[0].id);
-                });
+                refreshFeed();
             });
         }
     });
 
+    $('#div_pause_gos').on('click', function (event) {
+        chrome.storage.sync.set({'disabled': true}, function() {
+            $('#div_domain_paused_gos').show();
+            $('#div_pause_gos').hide();
+            refreshFeed();
+        });
+    });
+
+    $('#div_domain_paused_gos').on('click', function (event) {
+        chrome.storage.sync.set({'disabled': false}, function() {
+            $('#div_pause_gos').show();
+            $('#div_domain_paused_gos').hide();
+            refreshFeed();
+        });
+    });
+
     chrome.runtime.onMessage.addListener(
         function(request, sender, sendResponse) {
-            if (request.id === "count_increment") {
-                localNumOfBlocked ++;
-                numOfBlocked++;
-                blockedTextFunc(localNumOfBlocked, numOfBlocked);
-            } else if (request.id === 'url_fetched') {
-                $('#enable_plugin_text').text("Enable Game of spoils on <b>" + request.host + "</b>.");
+            if (request.id === "fetched_count") {
+                const numBlockedCountForTab = request.numBlockedCountForTab;
+                blockedTextFunc(numBlockedCountForTab, numBlockedCountForTab+remoteNumOfBlocked);
             }
         });
 });
+
+const refreshFeed = function () {
+    chrome.tabs.query({active: true, currentWindow: true}, function (arrayOfTabs) {
+        chrome.tabs.reload(arrayOfTabs[0].id);
+    });
+};
 
 const blockedTextFunc = function (localNum, numTotal) {
     $('#page_blocked_count').text(localNum);
     $('#total_blocked_count').text(numTotal);
 };
 
-var numOfBlocked = 0;
-var localNumOfBlocked = 0;
+var remoteNumOfBlocked = 0;

@@ -20,9 +20,6 @@ const HOST_LIST_DOM = {
 
 const HOST_LIST_REGEX = new RegExp(Object.keys(HOST_LIST_DOM).join('|'), 'i');
 
-
-
-
 const feedSelectorFunc = function(url, remoteDom) {
     if (remoteDom) {
         var remoteDomRegexp = new RegExp(Object.keys(remoteDom).join('|'), 'i');
@@ -49,10 +46,10 @@ const cleanFeed = function(feedSelector, regex) {
         if (this.classList.contains('glamoured')) {
             return;
         }
-        chrome.runtime.sendMessage({id: "count_increment", host: feedSelector.host});
         let divHeight = $(this).height();
         let matchedSpoiler = this.textContent.match(regex);
         if (matchedSpoiler) {
+            chrome.runtime.sendMessage({id: "count_increment"});
             exileTraitorousSpoiler($(this), matchedSpoiler[0], isBigDom(divHeight));
         }
     });
@@ -101,23 +98,24 @@ const isBigDom = function(divHeight) {
 };
 
 $document.ready(function() {
-    var port = chrome.runtime.connect({name: "gost"});
-    port.postMessage({request: "fetchkeywordAndPreference"});
-    port.onMessage.addListener(function(msg) {
-        if (!msg.disabled) {
-            var url = window.location.toString().toLowerCase();
-            var regExp = regexFunc(url, msg.keyword);
-            var feedSelector = feedSelectorFunc(url, msg.remoteData);
-            if (feedSelector) {
-                cleanFeed(feedSelector, regExp);
-                if (eventListener) {
-                    document.removeEventListener("DOMNodeInserted", eventListener);
+    chrome.runtime.onMessage.addListener(function(msg) {
+        if (msg.id === 'fetchedkeywordAndPreferences') {
+            if (!msg.disabled) {
+                var url = window.location.toString().toLowerCase();
+                var regExp = regexFunc(url, msg.keyword);
+                var feedSelector = feedSelectorFunc(url, msg.remoteData);
+                if (feedSelector) {
+                    cleanFeed(feedSelector, regExp);
+                    if (eventListener) {
+                        document.removeEventListener("DOMNodeInserted", eventListener);
+                    }
+                    eventListener = eventListenerFunc(feedSelector, regExp);
+                    document.addEventListener("DOMNodeInserted", eventListener);
                 }
-                eventListener = eventListenerFunc(feedSelector, regExp);
-                document.addEventListener("DOMNodeInserted", eventListener);
             }
         }
     });
+    chrome.runtime.sendMessage({id: "fetchkeywordAndPreference"});
 });
 
 const eventListenerFunc = function(feedSelector, regex) {
@@ -132,10 +130,3 @@ var eventListener;
 const GOT_RELATED_SUBREDDITS = ['gameofthrones', 'asoiaf', 'iceandfire', 'agotboardgame', 'gamesofthrones', 'westeros', 'thronescomics', 'asongofmemesandrage', 'earthoficeandfire'];
 
 const GOT_SUBREDDITS_REGEX = new RegExp('(\/r\/)' + GOT_RELATED_SUBREDDITS.join('|'), 'i');
-
-chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
-    if ((msg.id === 'fetch_url')) {
-        let host = feedSelectorFunc(window.location.toString().toLowerCase()).host;
-        chrome.runtime.sendMessage({'id': 'url_fetched', 'host': host})
-    }
-});
