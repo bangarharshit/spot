@@ -42,6 +42,7 @@ chrome.runtime.onMessage.addListener(
                             spoilerData = doc.data();
                         }
                     });
+                    sendMessageToContent( 'fetchedKeywordAndPreferences', extra_keyword.toLowerCase(), senderTabId);
                 });
             })
         } else if (request.id === 'fetchNumOfBlocked'){
