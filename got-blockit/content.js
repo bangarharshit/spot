@@ -99,7 +99,7 @@ const isBigDom = function(divHeight) {
 
 $document.ready(function() {
     chrome.runtime.onMessage.addListener(function(msg) {
-        if (msg.id === "fetchedkeywordAndPreferences") {
+        if (msg.id === "fetchedKeywordAndPreferences") {
             var url = window.location.toString().toLowerCase();
             var regExp = regexFunc(url, msg.keyword);
             var feedSelector = feedSelectorFunc(url, msg.remoteData);
@@ -113,7 +113,7 @@ $document.ready(function() {
             }
         }
     });
-    chrome.runtime.sendMessage({id: "fetchkeywordAndPreference"});
+    chrome.runtime.sendMessage({id: "fetchKeywordAndPreference"});
 });
 
 const eventListenerFunc = function(feedSelector, regex) {

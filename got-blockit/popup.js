@@ -14,10 +14,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
     chrome.runtime.onMessage.addListener(
         function(request, sender, sendResponse) {
-            if (request.id === "fetched_count") {
-                const numBlockedCountForTab = request.numBlockedCountForTab;
-                blockedTextFunc(numBlockedCountForTab, numBlockedCountForTab+remoteNumOfBlocked);
-            } else if (request.id === "count_incremented") {
+            if (request.id === "count_incremented") {
                 chrome.tabs.query({active: true, currentWindow: true}, function (arrayOfTabs) {
                     var currentTabId = arrayOfTabs[0].id;
                     if (currentTabId === request.tabId) {
@@ -25,38 +22,42 @@ document.addEventListener('DOMContentLoaded', function () {
                         blockedTextFunc(currentTabBlockedCount, currentTabBlockedCount + remoteNumOfBlocked);
                     }
                 })
-            } else if (request.id === 'paused') {
-                $('#div_resume_gos').show();
-                $('#div_pause_gos').hide();
-                refreshFeed();
-            } else if (request.id === 'resumed') {
-                $('#div_pause_gos').show();
-                $('#div_resume_gos').hide();
-                refreshFeed();
-            } else if (request.id === 'keyword_saved') {
-                refreshFeed();
             }
         });
 
     chrome.tabs.query({active: true, currentWindow: true}, function (arrayOfTabs) {
-        chrome.runtime.sendMessage({id: 'fetchNumOfBlocked', tabId: arrayOfTabs[0].id});
+        chrome.runtime.sendMessage({id: 'fetchNumOfBlocked', tabId: arrayOfTabs[0].id}, function (response) {
+            const numBlockedCountForTab = response.numBlockedCountForTab;
+            blockedTextFunc(numBlockedCountForTab, numBlockedCountForTab+remoteNumOfBlocked);
+        });
     });
+
 
 
 
     $("#keyword_submit_button").on('click', function(event){
         var newKeyWord = $('#keyword_input').val();
         if (newKeyWord){
-            chrome.runtime.sendMessage({'id': 'save_keyword', keyword: newKeyWord.toLowerCase()})
+            chrome.runtime.sendMessage({'id': 'save_keyword', keyword: newKeyWord.toLowerCase()}, function (response) {
+                refreshFeed();
+            })
         }
     });
 
     $('#div_pause_gos').on('click', function (event) {
-        chrome.runtime.sendMessage({'id': 'pause'});
+        chrome.runtime.sendMessage({'id': 'pause'}, function (response) {
+            $('#div_resume_gos').show();
+            $('#div_pause_gos').hide();
+            refreshFeed();
+        });
     });
 
     $('#div_resume_gos').on('click', function (event) {
-        chrome.runtime.sendMessage({'id': 'resume'});
+        chrome.runtime.sendMessage({'id': 'resume'}, function (response) {
+            $('#div_pause_gos').show();
+            $('#div_resume_gos').hide();
+            refreshFeed();
+        });
     });
 });
 

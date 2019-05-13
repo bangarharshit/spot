@@ -6,25 +6,23 @@ chrome.storage.sync.get('numOfBlocked', function (response) {
 
 chrome.runtime.onMessage.addListener(
     function(request, sender, sendResponse) {
+        var senderTabId = sender.tab ? sender.tab.id : request.tabId;
         if (request.id === "count_increment") {
             numOfBlocked++;
-            chrome.tabs.query({active: true, currentWindow: true}, function (arrayOfTabs) {
-                var tabId = arrayOfTabs[0].id;
-                var currentTabBlockedCount = numBlockedObject[tabId];
-                if (!currentTabBlockedCount) {
-                    currentTabBlockedCount = 0;
-                }
-                currentTabBlockedCount++;
-                numBlockedObject[tabId] = currentTabBlockedCount;
-                chrome.runtime.sendMessage({id: "count_incremented", tabId: tabId, currentTabBlockedCount: currentTabBlockedCount});
-                if (currentTabBlockedCount > 0) {
-                    chrome.browserAction.setBadgeText({text: currentTabBlockedCount.toString(), tabId: tabId});
-                }
-            });
+            var currentTabBlockedCount = numBlockedObject[senderTabId];
+            if (!currentTabBlockedCount) {
+                currentTabBlockedCount = 0;
+            }
+            currentTabBlockedCount++;
+            numBlockedObject[senderTabId] = currentTabBlockedCount;
+            chrome.runtime.sendMessage({id: "count_incremented", tabId: senderTabId, currentTabBlockedCount: currentTabBlockedCount});
+            if (currentTabBlockedCount > 0) {
+                chrome.browserAction.setBadgeText({text: currentTabBlockedCount.toString(), tabId: senderTabId});
+            }
             if (numOfBlocked % 50 === 0) { // rate limiting - find a better way.
                 chrome.storage.sync.set({'numOfBlocked': numOfBlocked});
             }
-        } else if (request.id === "fetchkeywordAndPreference") {
+        } else if (request.id === "fetchKeywordAndPreference") {
             chrome.storage.sync.get(['gos_keyword', 'disabled'],function(result){
                 if (result.disabled) {
                     return;
@@ -33,53 +31,50 @@ chrome.runtime.onMessage.addListener(
                 if (!extra_keyword) {
                     extra_keyword = '';
                 }
-                sendMessageToContent( 'fetchedkeywordAndPreferences', extra_keyword.toLowerCase());
-                db.collection("config").doc('dom_structure').get().then((doc) => {
-                    domData = doc.data();
-                    if (domData) {
-                        sendMessageToContent( 'fetchedkeywordAndPreferences', extra_keyword.toLowerCase());
-                    }
-                });
-                db.collection("config").doc("spoilers").get().then((doc) => {
-                    spoilerData = doc.data();
-                    if (spoilerData) {
-                        sendMessageToContent( 'fetchedkeywordAndPreferences', extra_keyword.toLowerCase());
-                    }
+                sendMessageToContent( 'fetchedKeywordAndPreferences', extra_keyword.toLowerCase(), senderTabId);
+                db.collection("config").get().then(function(querySnapshot) {
+                    querySnapshot.forEach(function(doc) {
+                        // doc.data() is never undefined for query doc snapshots
+                        console.log(doc.id, " => ", doc.data());
+                        if (doc.id === "dom_structure") {
+                            domData = doc.data();
+                        } else if (doc.id === "spoilers") {
+                            spoilerData = doc.data();
+                        }
+                    });
                 });
             })
         } else if (request.id === 'fetchNumOfBlocked'){
-            var tabId = request.tabId;
-            var numBlockedCountForTab = numBlockedObject[tabId];
+            var numBlockedCountForTab = numBlockedObject[senderTabId];
             if (!numBlockedCountForTab) {
                 numBlockedCountForTab = 0;
             }
-            chrome.runtime.sendMessage({'id': 'fetched_count', 'numBlockedCountForTab': numBlockedCountForTab});
+            sendResponse({'numBlockedCountForTab': numBlockedCountForTab});
         } else if (request.id === 'pause') {
             chrome.storage.sync.set({'disabled': true}, function() {
-                chrome.runtime.sendMessage({'id': 'paused'});
+                sendResponse({'id': 'paused'});
             });
+            return true;
         } else if (request.id === 'resume') {
             chrome.storage.sync.set({'disabled': false}, function() {
-                chrome.runtime.sendMessage({'id': 'resumed'});
+                sendResponse({'id': 'resumed'});
             });
+            return true;
         } else if (request.id === 'save_keyword') {
             chrome.storage.sync.set({'gos_keyword': request.keyword}, function() {
-                chrome.runtime.sendMessage({'id': 'keyword_saved'});
+                sendResponse({'id': 'keyword_saved'});
             });
+            return true;
         }
     });
 
 
-const sendMessageToContent = function (id, keyword) {
-    chrome.tabs.query({active: true, currentWindow: true}, function (arrayOfTabs) {
-        if (arrayOfTabs[0]) {
-            chrome.tabs.sendMessage(arrayOfTabs[0].id, {
-                'id': id,
-                'keyword': keyword,
-                'remoteData': domData,
-                'spoilerData': spoilerData
-            });
-        }
+const sendMessageToContent = function (id, keyword, tabId) {
+    chrome.tabs.sendMessage(tabId, {
+        'id': id,
+        'keyword': keyword,
+        'remoteData': domData,
+        'spoilerData': spoilerData
     });
 };
 
