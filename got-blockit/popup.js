@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', function () {
-    chrome.storage.sync.get(['gos_keyword', 'numOfBlocked', 'disabled'],function(response){
-        if (response.gos_keyword) {
-            document.getElementById("keyword_input").value = response.gos_keyword;
+    chrome.storage.sync.get(['userAddedKeywords', 'numOfBlocked', 'disabled'],function(response){
+        if (response.user_added_keywords) {
+            document.getElementById("keyword_input").value = response.user_added_keywords;
         }
         if (response.numOfBlocked) {
             remoteNumOfBlocked = response.numOfBlocked;
@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
     chrome.runtime.onMessage.addListener(
         function(request, sender, sendResponse) {
-            if (request.id === "count_incremented") {
+            if (request.id === "countIncremented") {
                 chrome.tabs.query({active: true, currentWindow: true}, function (arrayOfTabs) {
                     var currentTabId = arrayOfTabs[0].id;
                     if (currentTabId === request.tabId) {
@@ -26,19 +26,36 @@ document.addEventListener('DOMContentLoaded', function () {
         });
 
     chrome.tabs.query({active: true, currentWindow: true}, function (arrayOfTabs) {
-        chrome.runtime.sendMessage({id: 'fetchNumOfBlocked', tabId: arrayOfTabs[0].id}, function (response) {
+        chrome.runtime.sendMessage({id: 'fetchNumOfBlockedAndTopics', tabId: arrayOfTabs[0].id}, function (response) {
             const numBlockedCountForTab = response.numBlockedCountForTab;
+            const spoilerData = response.spoilerData;
+            spoilerData.forEach(
+                indSpoilerData => {
+                    $('#spoiler_list').append(indSpoilerDiv(indSpoilerData.title, indSpoilerData.id, indSpoilerData.disabled));
+                }
+            );
             blockedTextFunc(numBlockedCountForTab, numBlockedCountForTab+remoteNumOfBlocked);
         });
     });
 
 
+    $(document).on('change', 'input[type=checkbox]', function(e) {
+        if($(this).is(':checked')) {
+            chrome.runtime.sendMessage({'id': 'enableChannel', 'enabledChannel': $(this).attr('id')}, function (response) {
+                refreshFeed();
+            });
+        } else {
+            chrome.runtime.sendMessage({'id': 'disableChannel', 'disabledChannel': $(this).attr('id')}, function (response) {
+                refreshFeed();
+            });
+        }
+    });
 
 
     $("#keyword_submit_button").on('click', function(event){
         var newKeyWord = $('#keyword_input').val();
         if (newKeyWord){
-            chrome.runtime.sendMessage({'id': 'save_keyword', keyword: newKeyWord.toLowerCase()}, function (response) {
+            chrome.runtime.sendMessage({'id': 'saveKeyword', keyword: newKeyWord.toLowerCase()}, function (response) {
                 refreshFeed();
             })
         }
@@ -70,6 +87,10 @@ const refreshFeed = function () {
 const blockedTextFunc = function (localNum, numTotal) {
     $('#page_blocked_count').text(localNum);
     $('#total_blocked_count').text(numTotal);
+};
+
+const indSpoilerDiv = function (title, id, disabled) {
+ return "<div class='menu-entry'>" + title + "<span class='right'><input name='checkbox' type='checkbox' id='"+ id + "'" + (!disabled ? "checked": "") + "></span></div>";
 };
 
 var remoteNumOfBlocked = 0;
