@@ -118,7 +118,7 @@ const HOST_LIST_DOM = {
     "reddit.com": '.scrollerItem',
     "slack.com": 'ts-message',
     "twitter.com": "[data-item-type='tweet'], .trend-item",
-    "youtube.com": '.yt-lockup, .related-list-item, .comment-renderer-text, .ytd-grid-video-renderer, .ytd-video-renderer',
+    "youtube.com": '.yt-lockup, .related-list-item, .comment-renderer-text, ytd-grid-video-renderer, .ytd-video-renderer',
     "quora.com": '.feed_item, .QueryResult ',
     "instagram.com": 'article',
     "linkedin.com": '.feed-shared-update-v2, .feed-shared-update-v2--e2e, .feed-shared-update--chat-ui, .feed-shared-update-v2--minimal-padding'

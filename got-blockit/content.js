@@ -16,10 +16,11 @@ const cleanFeed = function(feedSelector, regex) {
             return;
         }
         let divHeight = $(this).height();
+        let divWidth = $(this).width();
         let matchedSpoiler = this.textContent.match(regex);
         if (matchedSpoiler) {
             chrome.runtime.sendMessage({id: "countIncrement"});
-            exileTraitorousSpoiler($(this), matchedSpoiler[0], isBigDom(divHeight));
+            exileTraitorousSpoiler($(this), matchedSpoiler[0], isBigDom(divHeight, divWidth));
         }
     });
 };
@@ -56,8 +57,8 @@ const exileTraitorousSpoiler = function($traitor, dark_words_of_spoilage, isBigD
     });
 };
 
-const isBigDom = function(divHeight) {
-  return divHeight > 200;
+const isBigDom = function(divHeight, divWidth) {
+  return divHeight > 200 && divWidth > 300;
 };
 
 $document.ready(function() {
