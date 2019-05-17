@@ -28,7 +28,7 @@ chrome.runtime.onMessage.addListener(
             if (currentTabBlockedCount > 0) {
                 chrome.browserAction.setBadgeText({text: currentTabBlockedCount.toString(), tabId: senderTabId});
             }
-            if (numOfBlocked % 50 === 0) { // rate limiting - find a better way.
+            if (numOfBlocked % 10 === 0) { // rate limiting - find a better way.
                 chrome.storage.sync.set({'numOfBlocked': numOfBlocked});
             }
         } else if (request.id === "fetchKeywordAndPreference") {
