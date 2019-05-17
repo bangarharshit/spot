@@ -71,6 +71,9 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
+    $('#bugreport').on('click', function (event) {
+       trackButtonClick(this);
+    });
     $('#div_resume_gos').on('click', function (event) {
         trackButtonClick(this);
         chrome.runtime.sendMessage({'id': 'resume'}, function (response) {
