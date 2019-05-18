@@ -36,6 +36,7 @@ chrome.runtime.onMessage.addListener(
                 return;
             }
             sendMessageToContent( 'fetchedKeywordAndPreferences', senderTabId);
+            fetchFromRemote();
         } else if (request.id === 'fetchNumOfBlockedAndTopics'){
             var numBlockedCountForTab = numBlockedObject[senderTabId];
             if (!numBlockedCountForTab) {
@@ -164,19 +165,22 @@ const computeSpoilerData = function() {
     spoilerDataArray = spoilerDataArrayLocal.slice();
 };
 
-db.collection("config").get().then(function(querySnapshot) {
-    querySnapshot.forEach(function(doc) {
-        // doc.data() is never undefined for query doc snapshots
-        if (doc.id === "dom_structure") {
-            domData = doc.data();
-        } else if (doc.id === "spoilers") {
-            var spoilerDataWithoutDisabledInfo = doc.data().sources;
-            spoilerData = spoilerDataWithoutDisabledInfo.map(convertToLocalSpoilerData);
-            computeSpoilerData();
-        }
+const  fetchFromRemote = function() {
+    db.collection("config").get().then(function(querySnapshot) {
+        querySnapshot.forEach(function(doc) {
+            // doc.data() is never undefined for query doc snapshots
+            if (doc.id === "dom_structure") {
+                domData = doc.data();
+            } else if (doc.id === "spoilers") {
+                var spoilerDataWithoutDisabledInfo = doc.data().sources;
+                spoilerData = spoilerDataWithoutDisabledInfo.map(convertToLocalSpoilerData);
+                computeSpoilerData();
+            }
+        });
     });
-});
+};
 
+fetchFromRemote();
 
 
 
