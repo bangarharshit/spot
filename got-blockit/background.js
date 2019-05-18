@@ -5,7 +5,7 @@ chrome.storage.sync.get(['numOfBlocked','disabledChannels', 'userAddedKeywords',
     if (response.disabledChannels) {
         disabledChannels = response.disabledChannels;
     }
-    if (response.userAddedKeywords) {
+    if (response.userAddedKeywords !== undefined && response.userAddedKeywords !== '') {
         userAddedKeywords = response.userAddedKeywords.split(',');
     }
     if (response.disabled) {
@@ -55,7 +55,9 @@ chrome.runtime.onMessage.addListener(
             return true;
         } else if (request.id === 'saveKeyword') {
             var keyword = request.keyword;
-            userAddedKeywords = keyword.split(',');
+            if (keyword !== undefined && keyword !== '') {
+                userAddedKeywords = keyword.split(',');
+            }
             chrome.storage.sync.set({'userAddedKeywords': keyword}, function() {
                 sendResponse({'id': 'keywordSaved'});
             });
