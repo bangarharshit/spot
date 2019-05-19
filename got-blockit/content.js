@@ -47,9 +47,6 @@ const exileTraitorousSpoiler = function($traitor, dark_words_of_spoilage, isBigD
     return $revealButton.on('click', function(ev) {
         ev.stopPropagation();
         ev.preventDefault();
-        if (!confirm("Are you sure you want to view this potentially spoiler-ific " + capitalized_spoiler_words + "?")) {
-            return;
-        }
         $glamour.addClass('revealed');
         return setTimeout((function() {
             return $glamour.remove();
