@@ -35,6 +35,7 @@ chrome.runtime.onMessage.addListener(
             if (disabled) {
                 return;
             }
+            trackContent(request.host);
             sendMessageToContent( 'fetchedKeywordAndPreferences', senderTabId);
             fetchFromRemote();
         } else if (request.id === 'fetchNumOfBlockedAndTopics'){
@@ -82,6 +83,8 @@ chrome.runtime.onMessage.addListener(
                 sendResponse({'id': 'channelEnabled'});
             });
             return true;
+        } else if (request.id === 'event') {
+            trackEvent(request.elementId, request.eventName);
         }
     });
 
@@ -182,7 +185,39 @@ const  fetchFromRemote = function() {
     });
 };
 
+const trackContent = function(host) {
+    if (host) {
+        trackEvent("content", "impression", host);
+    } else {
+        trackEvent("content", "impression");
+    }
+
+};
+
 fetchFromRemote();
 
+
+// Analytics
+var _AnalyticsCode = 'UA-52562136-3';
+var _gaq = _gaq || [];
+_gaq.push(['_setAccount', _AnalyticsCode]);
+_gaq.push(['_trackPageview']);
+(function() {
+    var ga = document.createElement('script');
+    ga.type = 'text/javascript';
+    ga.async = true;
+    ga.src = 'https://ssl.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0];
+    s.parentNode.insertBefore(ga, s);
+})();
+
+function trackEvent(elementId, eventName) {
+    _gaq.push(['_trackEvent', elementId, eventName]);
+}
+function trackEvent(elementId, eventName, metadata) {
+    _gaq.push(['_trackEvent', elementId, eventName, metadata]);
+}
+
+trackEvent("background.js", "impression");
 
 

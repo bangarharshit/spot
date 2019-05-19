@@ -1,4 +1,5 @@
 document.addEventListener('DOMContentLoaded', function () {
+    sendEvent("popup", "impression");
     chrome.storage.sync.get(['userAddedKeywords', 'numOfBlocked', 'disabled'],function(response){
         if (response.userAddedKeywords) {
             document.getElementById("keyword_input").value = response.userAddedKeywords;
@@ -41,12 +42,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
     $(document).on('change', 'input[type=checkbox]', function(e) {
         if($(this).is(':checked')) {
-            trackEnabled(this);
+            sendEvent(this.id, 'enabled');
             chrome.runtime.sendMessage({'id': 'enableChannel', 'enabledChannel': $(this).attr('id')}, function (response) {
                 refreshFeed();
             });
         } else {
-            trackDisabled(this);
+            sendEvent(this.id, 'disabled');
             chrome.runtime.sendMessage({'id': 'disableChannel', 'disabledChannel': $(this).attr('id')}, function (response) {
                 refreshFeed();
             });
@@ -55,7 +56,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
     $("#keyword_submit_button").on('click', function(event){
-        trackButtonClick(this);
+        sendEvent(this.id, 'click');
         var newKeyWord = $('#keyword_input').val();
         chrome.runtime.sendMessage({'id': 'saveKeyword', keyword: newKeyWord.toLowerCase()}, function (response) {
             refreshFeed();
@@ -63,7 +64,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     $('#div_pause_gos').on('click', function (event) {
-        trackButtonClick(this);
+        sendEvent(this.id, 'click');
         chrome.runtime.sendMessage({'id': 'pause'}, function (response) {
             $('#div_resume_gos').show();
             $('#div_pause_gos').hide();
@@ -72,17 +73,21 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     $('#bugreport').on('click', function (event) {
-       trackButtonClick(this);
+        sendEvent(this.id, 'click');
     });
     $('#div_resume_gos').on('click', function (event) {
-        trackButtonClick(this);
         chrome.runtime.sendMessage({'id': 'resume'}, function (response) {
             $('#div_pause_gos').show();
             $('#div_resume_gos').hide();
             refreshFeed();
         });
+        sendEvent(this.id, 'click');
     });
 });
+
+const sendEvent = function (elementId, eventName) {
+    chrome.runtime.sendMessage({'id': 'event', elementId: elementId, eventName: eventName})
+};
 
 const refreshFeed = function () {
     chrome.tabs.query({active: true, currentWindow: true}, function (arrayOfTabs) {
@@ -100,29 +105,3 @@ const indSpoilerDiv = function (title, id, disabled) {
 };
 
 var remoteNumOfBlocked = 0;
-
-var _AnalyticsCode = 'UA-52562136-3';
-var _gaq = _gaq || [];
-_gaq.push(['_setAccount', _AnalyticsCode]);
-_gaq.push(['_trackPageview']);
-(function() {
-    var ga = document.createElement('script');
-    ga.type = 'text/javascript';
-    ga.async = true;
-    ga.src = 'https://ssl.google-analytics.com/ga.js';
-    var s = document.getElementsByTagName('script')[0];
-    s.parentNode.insertBefore(ga, s);
-})();
-
-function trackButtonClick(e) {
-    _gaq.push(['_trackEvent', e.id, 'clicked']);
-}
-
-function trackEnabled(e) {
-    _gaq.push(['_trackEvent', e.id, 'enabled']);
-}
-
-
-function trackDisabled(e) {
-    _gaq.push(['_trackEvent', e.id, 'disabled']);
-}

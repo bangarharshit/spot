@@ -80,7 +80,7 @@ $document.ready(function() {
             }
         }
     });
-    chrome.runtime.sendMessage({id: "fetchKeywordAndPreference"});
+    chrome.runtime.sendMessage({id: "fetchKeywordAndPreference", host: window.location.hostname});
 });
 
 const eventListenerFunc = function(feedSelector, regex) {

@@ -41,16 +41,10 @@ const SPOILER_WORDS_LIST_POLITICS = [
     "smriti irani",
     "shashi tharoor",
     "thackeray",
-    "CPI",
-    "BJP",
-    "BSP",
     "Congress",
-    "AAP",
     "AAM aadmi party",
     "dmk",
     "shivsena",
-    "JDU",
-    "RJD",
     "Samajwadi Party"
     ];
 
