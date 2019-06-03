@@ -1,17 +1,17 @@
 const functions = require('firebase-functions');
-const admin = require('firebase-admin');
-admin.initializeApp();
+// [START firestore_quickstart]
+const {Firestore} = require('@google-cloud/firestore');
 
-exports.getSpoilers = functions.https.onRequest(((request, response) => {
-     var db = admin.firestore();
+// Create a new client
+const firestore = new Firestore();
 
-     db.collection('config').doc("spoilers").get()
-         .then((doc) => {
-          response.send(doc.data());
-          return null;
-         })
-         .catch((err) => {
-          console.log('Error getting documents', err);
-         });
-    })
+
+exports.getContent = functions.https.onRequest(async (request, response) => {
+
+        const dom_structure = await firestore.collection('config').doc("dom_structure").get();
+        const spoilers = await firestore.collection('config').doc('spoilers').get();
+        response.send({'dom_structure': dom_structure.data(), spoilers: spoilers.data()});
+    }
 );
+
+
