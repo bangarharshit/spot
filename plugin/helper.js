@@ -1,4 +1,4 @@
-var $log, GAME_O_SPOILERS_DEBUG_MODE, addClass, cl, debounce, debounce_timeout, hasClass, loadUserPreferences, log_timeout;
+var addClass, cl, debounce, debounce_timeout, hasClass;
 
 debounce_timeout = null;
 
